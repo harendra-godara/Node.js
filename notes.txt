@@ -1,0 +1,55 @@
+======================  HTTP METHOD =====================
+
+1. GET    =>    Data ko server se fetch/read karne ke liye
+2. POST   =>    Naya data create/add karne ke liye
+3. PUT    =>    Existing data ko completely update/replace karne ke liye
+4. PATCH  =>    Existing data ko partially update karne ke liye
+5. DELETE =>    Data delete karne ke liye
+
+
+======================= versioning ======================
+
+version
+4.18.2
+
+1st Part -> 4
+2nd Part -> 18
+3rd Part -> 2
+
+
+# 3rd Part (Last Part)  - Minor Fixes (Optional)
+
+Latest -> 4.18.2
+
+# 2nd Part - Recommended Bug Fix (security Fix)
+Latest -> 4.19.2
+
+# 1st Major Release - Major / Breaking update 
+
+Latest -> 5.19.2
+
+-----------------------------------------------------------
+
+express = ^4.18.2
+#4th version 
+
+^4.18.2 | 4.18.2 -> < 5.0.0 |
+
+^ -> Install all Recommended and Minor Fixes Automatically 
+
+-----------------------------------------------------------
+
+~4.18.1
+~4.18.2
+~4.18.3
+~4.18.4
+
+~4.19.0  Nooooo 
+
+~ -> Install only Minor Fixes Automatically
+
+=============================================================
+
+======================= Rest API ============================
+
+
