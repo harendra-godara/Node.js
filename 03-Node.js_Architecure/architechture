@@ -1,0 +1,719 @@
+NODE.JS — HOW NODE.JS WORKS / EVENT LOOP
+Piyush Garg Style Study Notes
+===============================================
+
+1. NODE.JS KYA HAI?
+-------------------
+Node.js ek JavaScript runtime environment hai jo JavaScript ko browser ke bahar run karta hai.
+
+Node.js Chrome ke V8 JavaScript engine par built hai.
+
+Main components:
+- V8 → JavaScript execute karta hai
+- libuv → Event Loop aur asynchronous I/O ko support karta hai
+- C/C++ → Node.js ke core/native features ko support karta hai
+
+Basic flow:
+
+JavaScript Code
+      ↓
+   Node.js
+      ↓
+      V8
+      ↓
+JavaScript Execute
+
+
+2. NODE.JS ARCHITECTURE
+-----------------------
+High-level architecture:
+
+                 Node.js Process
+                        │
+                        ▼
+                   Main Thread
+                        │
+                        ▼
+                V8 JavaScript Engine
+                        │
+                        ▼
+                    Call Stack
+                        │
+                        ▼
+                  Node.js APIs
+                        │
+                        ▼
+                     libuv
+                        │
+             ┌──────────┴──────────┐
+             ▼                     ▼
+         Event Loop            Thread Pool
+             │                     │
+             ▼                     ▼
+       Async Callbacks        Background Tasks
+
+
+3. NODE.JS SINGLE-THREADED?
+---------------------------
+Node.js ko commonly single-threaded kaha jata hai.
+
+Correct meaning:
+JavaScript code primarily ek main thread par execute hota hai.
+
+Iska matlab ye nahi hai ki Node.js mein sirf ek thread hota hai.
+
+Node.js background operations ke liye:
+- libuv
+- Thread Pool
+- OS-level asynchronous mechanisms
+- Worker Threads
+
+ka use kar sakta hai.
+
+
+4. V8 JAVASCRIPT ENGINE
+-----------------------
+V8 Google ka JavaScript engine hai.
+
+Kaam:
+JavaScript code ko execute karna.
+
+Example:
+
+const a = 10;
+const b = 20;
+console.log(a + b);
+
+V8 JavaScript ko execute karega.
+
+Remember:
+V8 = JavaScript Execution Engine
+
+
+5. NODE.JS PROCESS
+------------------
+Jab hum command run karte hain:
+
+node app.js
+
+Operating System ek Node.js process start karta hai.
+
+Flow:
+
+node app.js
+    ↓
+Node Process
+    ↓
+V8
+    ↓
+JavaScript Execution
+
+
+6. CALL STACK
+-------------
+Call Stack JavaScript ke functions ko execute/manage karta hai.
+
+Example:
+
+function one() {
+    two();
+}
+
+function two() {
+    console.log("Hello");
+}
+
+one();
+
+Execution:
+
+one()
+ ↓
+two()
+ ↓
+console.log()
+ ↓
+two() remove
+ ↓
+one() remove
+
+Call Stack LIFO principle follow karta hai:
+Last In, First Out.
+
+
+7. SYNCHRONOUS CODE
+-------------------
+Example:
+
+console.log("A");
+console.log("B");
+console.log("C");
+
+Output:
+
+A
+B
+C
+
+Code line-by-line execute hota hai.
+
+
+8. ASYNCHRONOUS CODE
+--------------------
+Example:
+
+console.log("A");
+
+setTimeout(() => {
+    console.log("B");
+}, 2000);
+
+console.log("C");
+
+Output:
+
+A
+C
+B
+
+Node.js timer ke liye main thread ko block nahi karta.
+
+
+9. EVENT LOOP
+-------------
+Event Loop Node.js ka sabse important concept hai.
+
+Event Loop asynchronous operations ke callbacks ko appropriate time par execute karne mein help karta hai.
+
+Simplified flow:
+
+Call Stack
+    ↓
+Event Loop
+    ↓
+Async Operation Complete
+    ↓
+Callback Ready
+    ↓
+Call Stack
+    ↓
+Execute
+
+
+10. NON-BLOCKING I/O
+--------------------
+Node.js ka major feature non-blocking I/O hai.
+
+Example:
+
+const fs = require("fs");
+
+fs.readFile("data.txt", "utf8", (err, data) => {
+    console.log("File Read");
+});
+
+console.log("Hello");
+
+Output:
+
+Hello
+File Read
+
+Node.js file read hone ka wait karke main thread ko block nahi karta.
+
+
+11. libuv
+---------
+libuv Node.js architecture ka important library/component hai.
+
+Main responsibilities:
+- Event Loop
+- Asynchronous I/O support
+- Thread Pool
+- Timers
+- File-system related async operations
+- Networking support
+
+Remember:
+
+V8   → JavaScript execute
+libuv → Async I/O + Event Loop infrastructure
+
+
+12. THREAD POOL
+--------------
+libuv ke through kuch operations background thread pool par execute ho sakte hain.
+
+Thread Pool ka simplified model:
+
+                 Node.js
+                    │
+                Main Thread
+                    │
+                Event Loop
+                    │
+              Async Operation
+                    │
+                    ▼
+               Thread Pool
+              ┌────┼────┐
+              ▼    ▼    ▼
+             T1   T2   T3 ...
+
+Thread pool se commonly associated operations:
+- File system operations
+- Some crypto operations
+- Certain DNS operations
+
+Important:
+Har asynchronous operation thread pool mein nahi jaata.
+Network I/O ke liye OS-level asynchronous mechanisms bhi use hote hain.
+
+
+13. EVENT LOOP + THREAD POOL
+----------------------------
+Dono ko confuse mat karna.
+
+Event Loop:
+Callback ko coordinate/process karne mein help karta hai.
+
+Thread Pool:
+Kuch background operations perform karta hai.
+
+Simple:
+
+Event Loop → Callback handling
+Thread Pool → Certain background work
+
+
+14. IMPORTANT EXAMPLE
+---------------------
+const fs = require("fs");
+
+console.log("Start");
+
+fs.readFile("data.txt", "utf8", (err, data) => {
+    console.log("File Read");
+});
+
+console.log("End");
+
+Output:
+
+Start
+End
+File Read
+
+Execution:
+
+1. "Start" execute
+2. fs.readFile() async operation start
+3. Node.js wait nahi karta
+4. "End" execute
+5. File read complete hoti hai
+6. Callback execution ke liye schedule hota hai
+7. Event Loop callback ko execute karwata hai
+8. "File Read" print hota hai
+
+
+15. EVENT LOOP PHASES
+--------------------
+Node.js Event Loop ke important phases:
+
+Timers
+   ↓
+Pending Callbacks
+   ↓
+Idle / Prepare
+   ↓
+Poll
+   ↓
+Check
+   ↓
+Close Callbacks
+   ↓
+Repeat
+
+
+16. TIMERS PHASE
+----------------
+setTimeout() aur setInterval() ke callbacks timers phase se associated hote hain.
+
+Example:
+
+setTimeout(() => {
+    console.log("Timer");
+}, 1000);
+
+
+17. POLL PHASE
+--------------
+Poll phase I/O related callbacks ko process karta hai.
+
+Example:
+- File I/O
+- Network I/O related callbacks
+
+
+18. CHECK PHASE
+---------------
+Check phase mein setImmediate() ke callbacks execute hote hain.
+
+Example:
+
+setImmediate(() => {
+    console.log("Immediate");
+});
+
+
+19. CLOSE CALLBACKS
+-------------------
+Closed resources ke callbacks yahan handle ho sakte hain.
+
+Example:
+Socket close hone ke baad related close callback.
+
+
+20. setTimeout() VS setImmediate()
+----------------------------------
+Example:
+
+setTimeout(() => {
+    console.log("Timeout");
+}, 0);
+
+setImmediate(() => {
+    console.log("Immediate");
+});
+
+Main module ke context mein order deterministic nahi maana jaana chahiye.
+
+Lekin I/O callback ke andar setImmediate() normally pehle execute hota hai:
+
+const fs = require("fs");
+
+fs.readFile("data.txt", () => {
+
+    setTimeout(() => {
+        console.log("Timeout");
+    }, 0);
+
+    setImmediate(() => {
+        console.log("Immediate");
+    });
+
+});
+
+Typical output:
+
+Immediate
+Timeout
+
+Reason:
+I/O callback ke baad Event Loop check phase tak pahunchta hai jahan setImmediate() execute hota hai.
+
+
+21. process.nextTick()
+----------------------
+Node.js mein process.nextTick() callback ko high-priority queue mein schedule karta hai.
+
+Example:
+
+process.nextTick(() => {
+    console.log("Next Tick");
+});
+
+Simplified priority idea:
+
+Current JavaScript
+      ↓
+process.nextTick queue
+      ↓
+Promise microtasks
+      ↓
+Event Loop phases
+
+Caution:
+Bahut saare recursive nextTick() callbacks Event Loop ko starve kar sakte hain.
+
+
+22. PROMISE / MICROTASK
+----------------------
+Example:
+
+console.log("Start");
+
+Promise.resolve().then(() => {
+    console.log("Promise");
+});
+
+console.log("End");
+
+Output:
+
+Start
+End
+Promise
+
+Promise callbacks microtask queue mein schedule hote hain.
+
+Simplified:
+
+Current JavaScript
+      ↓
+Microtasks
+      ↓
+Event Loop phases
+
+
+23. WORKER THREADS
+------------------
+Worker Threads Node.js mein CPU-intensive JavaScript work ko separate threads par run karne ke liye use kiye ja sakte hain.
+
+Main Thread
+     │
+     ├── Event Loop
+     │
+     └── Worker Thread
+             │
+             └── CPU-intensive task
+
+Useful for:
+- Heavy calculations
+- CPU-intensive processing
+- Large computations
+
+Worker Threads aur libuv Thread Pool same cheez nahi hain.
+
+
+24. CPU-BOUND VS I/O-BOUND
+--------------------------
+I/O-bound tasks:
+- Database
+- File
+- Network
+- APIs
+
+Node.js I/O-bound workloads ke liye bahut suitable hai because non-blocking I/O concurrency ko efficiently handle karta hai.
+
+CPU-bound tasks:
+- Huge calculations
+- Complex computation
+- Heavy data processing
+
+Agar CPU-heavy JavaScript main thread par continuously chale:
+
+CPU-heavy task
+      ↓
+Main Thread busy
+      ↓
+Event Loop blocked
+      ↓
+Other requests delayed
+
+Aise cases mein Worker Threads useful ho sakte hain.
+
+
+25. COMPLETE EXECUTION FLOW
+---------------------------
+                         NODE.JS
+                            │
+                            ▼
+                     Node.js Process
+                            │
+                            ▼
+                       Main Thread
+                            │
+                            ▼
+                           V8
+                            │
+                            ▼
+                       Call Stack
+                            │
+                            ▼
+                      Node.js APIs
+                            │
+                            ▼
+                          libuv
+                            │
+              ┌─────────────┴─────────────┐
+              ▼                           ▼
+         Event Loop                  Thread Pool
+              │                           │
+      ┌───────┼────────┐                  │
+      ▼       ▼        ▼                  ▼
+   Timers    Poll     Check          Background
+      │       │        │               Tasks
+      └───────┴────────┴──────┬───────────┘
+                              ▼
+                     Callback / Microtask
+                              │
+                              ▼
+                         Call Stack
+                              │
+                              ▼
+                           Execute
+
+
+26. HOW NODE.JS HANDLES A REQUEST
+---------------------------------
+Client
+  │
+  │ HTTP Request
+  ▼
+Node.js Server
+  │
+  ▼
+Event Loop
+  │
+  ├── Simple JavaScript
+  │
+  └── Async I/O
+          │
+          ▼
+       libuv / OS
+          │
+          ▼
+     Database / File / Network
+          │
+          ▼
+        Result
+          │
+          ▼
+       Callback
+          │
+          ▼
+      Event Loop
+          │
+          ▼
+      Call Stack
+          │
+          ▼
+       Response
+          │
+          ▼
+        Client
+
+
+27. WHY NODE.JS IS FAST?
+------------------------
+Node.js ki performance ka major reason:
+- Non-blocking I/O
+- Event-driven architecture
+- Efficient Event Loop
+- V8 JavaScript engine
+- Async I/O
+- Efficient handling of concurrent I/O-bound requests
+
+Important:
+Node.js automatically har type ke workload ke liye fast nahi hota.
+CPU-heavy work main thread ko block kar sakta hai.
+
+
+28. IMPORTANT INTERVIEW QUESTIONS
+----------------------------------
+
+Q1. Node.js kya hai?
+A:
+Node.js ek JavaScript runtime environment hai jo browser ke bahar JavaScript run karne deta hai.
+
+Q2. V8 kya hai?
+A:
+V8 Google ka JavaScript engine hai jo JavaScript execute karta hai.
+
+Q3. Node.js single-threaded hai?
+A:
+JavaScript execution primarily ek main thread par hota hai, lekin Node.js background operations ke liye libuv, thread pool, OS mechanisms aur worker threads ka use kar sakta hai.
+
+Q4. Event Loop kya hai?
+A:
+Event Loop asynchronous callbacks ko coordinate karta hai aur ready callbacks ko JavaScript execution ke liye process karta hai.
+
+Q5. libuv kya hai?
+A:
+libuv Node.js ko Event Loop, asynchronous I/O aur thread pool infrastructure provide karta hai.
+
+Q6. Thread Pool kya hai?
+A:
+Thread Pool kuch operations ko background threads par perform karne ke liye use hota hai.
+
+Q7. Non-blocking I/O kya hai?
+A:
+Jab Node.js I/O operation ke complete hone ka wait karke main JavaScript thread ko block nahi karta, use non-blocking I/O kehte hain.
+
+Q8. setImmediate() kis phase se associated hai?
+A:
+Check phase.
+
+Q9. setTimeout() kis phase se associated hai?
+A:
+Timers phase.
+
+Q10. Worker Threads ka use kyun karte hain?
+A:
+CPU-intensive JavaScript work ko main thread se alag execute karne ke liye.
+
+
+29. QUICK REVISION
+------------------
+Remember this flow:
+
+V8
+↓
+JavaScript Execution
+
+Call Stack
+↓
+JS Functions
+
+Node APIs
+↓
+Async Operations
+
+libuv
+↓
+Event Loop + Async I/O Infrastructure
+
+Thread Pool
+↓
+Certain Background Operations
+
+Event Loop
+↓
+Callbacks Coordination
+
+Worker Threads
+↓
+CPU-intensive JavaScript
+
+
+30. ONE-LINE INTERVIEW ANSWER
+-----------------------------
+"Node.js is a JavaScript runtime built on Google's V8 engine. JavaScript runs primarily on a single main thread, while libuv provides the Event Loop and asynchronous I/O infrastructure. Some operations can use the thread pool, and CPU-intensive JavaScript can be moved to Worker Threads. This event-driven, non-blocking architecture makes Node.js efficient for I/O-bound and highly concurrent applications."
+
+
+31. FINAL MEMORY TRICK
+----------------------
+V8
+→ JS execute
+
+Call Stack
+→ Functions execute
+
+libuv
+→ Async I/O + Event Loop support
+
+Event Loop
+→ Callbacks coordinate
+
+Thread Pool
+→ Certain background operations
+
+Worker Threads
+→ CPU-heavy JS work
+
+Non-blocking I/O
+→ Main thread unnecessarily wait nahi karta
+
+
+END OF NOTES
