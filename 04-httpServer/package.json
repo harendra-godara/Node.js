@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/harendra-godara/Node.js#readme",
   "dependencies": {
+    "express": "^5.2.1",
     "url": "^0.11.4"
   }
 }
