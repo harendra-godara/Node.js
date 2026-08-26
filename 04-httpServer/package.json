@@ -1,0 +1,22 @@
+{
+  "name": "node_js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/harendra-godara/Node.js.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/harendra-godara/Node.js/issues"
+  },
+  "homepage": "https://github.com/harendra-godara/Node.js#readme",
+  "dependencies": {
+    "url": "^0.11.4"
+  }
+}
