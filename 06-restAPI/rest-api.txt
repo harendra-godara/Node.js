@@ -1,0 +1,719 @@
+REST API NOTES
+================================
+
+Note:
+These notes follow the concepts and teaching flow commonly covered in Piyush Garg's REST API/backend content. They are rewritten in easy Hinglish and are not a verbatim transcript.
+
+1. REST API KYA HOTI HAI?
+-------------------------
+REST = Representational State Transfer
+
+REST ek architectural style hai jiske principles follow karke APIs design ki jaati hain.
+
+Simple language:
+Client aur Server ke beech data exchange karne ka standard way REST API ke through hota hai.
+
+Basic Flow:
+
+Frontend / Client
+       |
+       | HTTP Request
+       v
+   REST API
+       |
+       v
+    Backend
+       |
+       v
+   Database
+
+Example:
+GET /restaurants
+
+Frontend -> REST API -> Backend -> Database
+Database -> Backend -> REST API -> Frontend
+
+
+2. API KYA HAI?
+---------------
+API = Application Programming Interface
+
+API ek interface hai jo do applications/systems ko communicate karne deta hai.
+
+Application A
+     |
+     | Request
+     v
+    API
+     |
+     | Response
+     v
+Application B
+
+Frontend ko normally directly database se connect nahi karna chahiye.
+
+Wrong:
+Frontend ----------> Database
+
+Correct:
+Frontend
+   |
+   v
+ REST API
+   |
+   v
+Backend
+   |
+   v
+Database
+
+
+3. REST API ARCHITECTURE
+------------------------
+                    REQUEST
+                       |
+                       v
++--------------+   HTTP   +--------------+
+|    CLIENT    | --------> |    SERVER    |
+| React        |           | Node.js      |
+| Mobile App   |           | Express      |
+| Postman      |           |              |
++--------------+           +------+-------+
+                                  |
+                                  v
+                           +--------------+
+                           |   DATABASE   |
+                           | MongoDB etc. |
+                           +--------------+
+
+                    RESPONSE
+                       ^
+                       |
+                  JSON Response
+
+
+4. HTTP METHODS
+---------------
+REST APIs mein mainly ye HTTP methods use hote hain:
+
+GET     -> Data read/get karna
+POST    -> Naya data/resource create karna
+PUT     -> Resource ko completely update/replace karna
+PATCH   -> Resource ke kuch fields update karna
+DELETE  -> Resource delete karna
+
+CRUD:
+
+C -> Create -> POST
+R -> Read   -> GET
+U -> Update -> PUT / PATCH
+D -> Delete -> DELETE
+
+
+5. GET REQUEST
+--------------
+Server se data lene ke liye GET use hota hai.
+
+GET /users
+
+Flow:
+
+Client
+  |
+  | GET /users
+  v
+Server
+  |
+  | Find users
+  v
+Database
+  |
+  v
+Users
+  |
+  v
+JSON Response
+
+Example response:
+
+[
+  {
+    "id": 1,
+    "name": "Rahul"
+  },
+  {
+    "id": 2,
+    "name": "Aman"
+  }
+]
+
+
+6. POST REQUEST
+---------------
+Naya resource create karne ke liye POST use hota hai.
+
+POST /users
+
+Request body:
+
+{
+  "name": "Anurag",
+  "email": "anurag@gmail.com"
+}
+
+Flow:
+
+Client
+   |
+   | POST /users
+   | Body
+   v
+Server
+   |
+   | Validate
+   v
+Database
+   |
+   | INSERT
+   v
+New User
+
+
+7. PUT vs PATCH
+---------------
+PUT:
+Generally complete resource ko update/replace karne ke liye.
+
+PATCH:
+Resource ke sirf required/selected fields update karne ke liye.
+
+Example existing user:
+
+{
+  "name": "Anurag",
+  "email": "abc@gmail.com",
+  "age": 22
+}
+
+PUT:
+
+{
+  "name": "Harendra",
+  "email": "xyz@gmail.com",
+  "age": 23
+}
+
+PATCH /users/1:
+
+{
+  "age": 23
+}
+
+PUT  -> Complete Resource Update
+PATCH -> Partial Resource Update
+
+
+8. DELETE REQUEST
+-----------------
+Resource delete karne ke liye:
+
+DELETE /users/1
+q
+Flow:
+
+Client
+  |
+  | DELETE /users/1
+  v
+Server
+  |
+  | Find user
+  v
+Database
+  |
+  | DELETE
+  v
+Response
+
+
+9. REST API URL DESIGN
+----------------------
+REST mein URLs resources ko represent karte hain.
+d
+Good:
+
+GET    /users
+GET    /users/10
+POST   /users
+PUT    /users/10
+PATCH  /users/10
+DELETE /users/10
+
+Generally avoid:
+
+/getUsers
+/createUser
+/deleteUser
+/updateUser
+
+Reason:
+HTTP method already action bata raha hai.
+
+GET /users      -> Users get karo
+POST /users     -> User create karo
+DELETE /users/1 -> User delete karo
+
+
+10. RESOURCE KYA HOTA HAI?
+--------------------------
+REST mein important entities ko resources maana ja sakta hai.
+
+CampusEats example:
+
+/users
+/restaurants
+/foods
+/orders
+/reviews
+/payments
+
+Diagram:
+
+                    API
+                     |
+       +-------------+-------------+
+       |             |             |
+       v             v             v
+     Users      Restaurants      Orders
+       |             |             |
+    /users       /restaurants   /orders
+
+
+11. URL PARAMETERS
+------------------
+Specific resource ko identify karne ke liye path/URL parameter use hota hai.
+
+GET /users/101
+
+/users -> Resource
+101    -> Resource ID
+
+Another example:
+
+GET /restaurants/10/foods
+
+Meaning:
+Restaurant 10 ke foods.
+
+
+12. QUERY PARAMETERS
+--------------------
+Filtering, searching, sorting aur pagination ke liye query parameters use kiye ja sakte hain.
+
+GET /restaurants?city=jaipur
+
+Multiple:
+
+GET /restaurants?city=jaipur&rating=4
+
+Search:
+
+GET /restaurants?search=pizza
+
+Pagination:
+
+GET /restaurants?page=2&limit=10
+
+Diagram:
+
+/restaurants
+      |
+      +---- ?city=jaipur
+      |
+      +---- &rating=4
+
+
+13. HTTP REQUEST STRUCTURE
+--------------------------
+HTTP request mein commonly:
+
+Method
+URL
+Headers
+Body
+
+Example:
+
+POST /users HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer TOKEN
+
+Body:
+
+{
+  "name": "Anurag",
+  "email": "anurag@gmail.com"
+}
+
+
+14. HTTP HEADERS
+----------------
+Headers request/response ke saath additional information dete hain.
+
+Common headers:
+
+Content-Type
+Authorization
+Accept
+User-Agent
+
+Example:
+
+Content-Type: application/json
+
+Meaning:
+Data JSON format mein hai.
+
+Authentication:
+
+Authorization: Bearer <JWT_TOKEN>
+
+
+15. HTTP RESPONSE
+-----------------
+Server response mein commonly:
+
+Status Code
+Headers
+Body
+
+Example:
+
+Status Code: 200
+
+{
+  "message": "User fetched successfully",
+  "user": {
+    "id": 101,
+    "name": "Anurag"
+  }
+}
+
+
+16. HTTP STATUS CODES
+--------------------
+2xx = Success
+
+200 -> OK
+201 -> Created
+204 -> No Content
+
+4xx = Client Error
+
+400 -> Bad Request
+401 -> Unauthorized
+403 -> Forbidden
+404 -> Not Found
+409 -> Conflict
+
+5xx = Server Error
+
+500 -> Internal Server Error
+502 -> Bad Gateway
+503 -> Service Unavailable
+
+Easy trick:
+
+2xx -> Success
+4xx -> Client ki problem
+5xx -> Server ki problem
+
+
+17. STATELESSNESS
+-----------------
+REST ka important principle Statelessness hai.
+
+Meaning:
+Server ko previous request ka state remember karne par depend nahi karna chahiye.
+
+Example:
+
+Request 1
+Client -> Server
+          Login
+
+Request 2
+Client -> Server
+          JWT Token
+
+Har request mein required authentication information bheji ja sakti hai.
+
+Request
+   |
+   +-- Authorization: Bearer JWT
+   |
+   v
+Server
+
+
+18. JSON
+--------
+REST APIs mein commonly JSON format use hota hai.
+
+JSON = JavaScript Object Notation
+
+Example:
+
+{
+  "id": 101,
+  "name": "Anurag",
+  "email": "anurag@gmail.com"
+}
+
+JSON client aur server ke beech data exchange ke liye bahut common format hai.
+
+
+19. COMPLETE REST API FLOW
+--------------------------
+
+                         HTTP REQUEST
+                              |
+                              v
+                    +-----------------+
+                    |     CLIENT      |
+                    | React/Postman   |
+                    +--------+--------+
+                             |
+                             v
+                    +-----------------+
+                    |    REST API     |
+                    | Node + Express  |
+                    +--------+--------+
+                             |
+                             v
+                    +-----------------+
+                    |      ROUTE      |
+                    |  GET /users     |
+                    +--------+--------+
+                             |
+                             v
+                    +-----------------+
+                    |    CONTROLLER   |
+                    +--------+--------+
+                             |
+                             v
+                    +-----------------+
+                    |    DATABASE     |
+                    +--------+--------+
+                             |
+                             v
+                    +-----------------+
+                    |      JSON       |
+                    |    RESPONSE     |
+                    +--------+--------+
+                             |
+                             v
+                    +-----------------+
+                    |     CLIENT      |
+                    +-----------------+
+
+
+20. REST API + NODE.JS + EXPRESS
+--------------------------------
+Backend mein typical flow:
+
+Client
+  |
+  | HTTP Request
+  v
+Express Router
+  |
+  v
+Controller
+  |
+  v
+Service / Business Logic
+  |
+  v
+Database
+  |
+  v
+Controller
+  |
+  v
+JSON Response
+
+
+Simple Express example:
+
+app.get("/users", (req, res) => {
+    res.json({
+        message: "All users"
+    });
+});
+
+Request:
+GET /users
+
+Response:
+
+{
+  "message": "All users"
+}
+
+
+21. REST API vs API
+-------------------
+API ek general concept hai.
+
+REST API API design karne ka ek architectural approach hai.
+
+API
+|
++-- REST API
++-- SOAP API
++-- GraphQL API
++-- gRPC
+
+
+22. REST KE IMPORTANT PRINCIPLES
+--------------------------------
+REST ke major principles:
+
+1. Client-Server
+2. Stateless
+3. Cacheable
+4. Uniform Interface
+5. Layered System
+6. Code on Demand (optional)
+
+Easy memory:
+C S S C U L
+
+Client-Server
+Stateless
+Cacheable
+Uniform Interface
+Layered System
+Code-on-Demand
+
+
+23. CAMPUS EATS EXAMPLE
+-----------------------
+Suppose user restaurants dekhna chahta hai.
+
+GET /api/v1/restaurants
+
+Flow:
+
+User
+  |
+  v
+Frontend
+  |
+  | GET /api/v1/restaurants
+  v
+Express Router
+  |
+  v
+Restaurant Controller
+  |
+  v
+Restaurant Service
+  |
+  v
+Database
+  |
+  v
+Restaurants
+  |
+  v
+JSON
+  |
+  v
+Frontend
+  |
+  v
+User
+
+Example response:
+
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "name": "Campus Cafe"
+    },
+    {
+      "id": 2,
+      "name": "Food Corner"
+    }
+  ]
+}
+
+
+24. ONE-LINE DEFINITION
+-----------------------
+REST API is a way of designing web APIs where clients interact with
+server resources using standard HTTP methods such as GET, POST,
+PUT, PATCH and DELETE.
+
+
+25. QUICK REVISION
+------------------
+REST
+|
++-- Resource based URLs
+|
++-- HTTP Methods
+|     +-- GET
+|     +-- POST
+|     +-- PUT
+|     +-- PATCH
+|     +-- DELETE
+|
++-- HTTP Status Codes
+|
++-- Headers
+|
++-- JSON
+|
++-- Statelessness
+|
++-- Client-Server Architecture
+|
++-- Uniform Interface
+|
++-- Layered System
+
+
+IMPORTANT FOR BACKEND LEARNING
+------------------------------
+REST API ke baad recommended learning order:
+
+HTTP + REST API
+        |
+        v
+Express Routing
+        |
+        v
+Middleware
+        |
+        v
+Controller / Service Architecture
+        |
+        v
+Database Integration
+        |
+        v
+JWT Authentication
+        |
+        v
+Authorization
+        |
+        v
+Validation + Error Handling
+        |
+        v
+Production-ready Backend
